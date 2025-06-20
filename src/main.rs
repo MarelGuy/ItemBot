@@ -105,18 +105,11 @@ impl EventHandler for Handler {
 #[tokio::main]
 async fn main() {
     tracing_subscriber::registry()
-        .with(EnvFilter::from_default_env())
+        .with(env!("RUST_LOG").parse::<EnvFilter>().unwrap())
         .with(fmt::layer().with_file(true).with_line_number(true))
         .init();
 
-    let token: String = match env::var("DISCORD_TOKEN") {
-        Ok(token) => token,
-        Err(e) => {
-            error!("Expected a token in the environment: {e}");
-
-            return;
-        }
-    };
+    let token: String = env!("DISCORD_TOKEN").into();
 
     let mut client: Client = match Client::builder(token, GatewayIntents::empty())
         .event_handler(Handler)
